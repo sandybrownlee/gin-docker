@@ -11,6 +11,7 @@ RUN apt-get update && apt-get install -y \
     unzip \
     curl \
     git \
+    nano \
     ca-certificates \
     python3 \
     python3-venv \
@@ -20,6 +21,9 @@ RUN apt-get update && apt-get install -y \
     lshw \
     zstd \
     && rm -rf /var/lib/apt/lists/*
+
+# Create non-root user for builds (needed for tests that check file permissions)
+RUN useradd -m builder
 
 # ---------------------------------------------------------------
 # Install SDKMAN for Java, Maven, Gradle
@@ -145,7 +149,7 @@ RUN bash -c "source $HOME/.sdkman/bin/sdkman-init.sh && \
     cd /opt/gson && mvn clean compile 2>&1 | tee /opt/logs/gson_compile.log"
 
 RUN bash -c "source $HOME/.sdkman/bin/sdkman-init.sh && \
-    cd /opt/gson && mvn clean test 2>&1 | tee /opt/logs/gson_test.log"
+    cd /opt/gson && mvn clean install 2>&1 | tee /opt/logs/gson_test.log"
 
 # ---------------------------------------------------------------
 # Build JUnit4 (compile + test) with logs
@@ -153,8 +157,13 @@ RUN bash -c "source $HOME/.sdkman/bin/sdkman-init.sh && \
 RUN bash -c "source $HOME/.sdkman/bin/sdkman-init.sh && \
     cd /opt/junit4 && mvn clean compile 2>&1 | tee /opt/logs/junit4_compile.log"
 
-RUN bash -c "source $HOME/.sdkman/bin/sdkman-init.sh && \
-    cd /opt/junit4 && mvn clean test 2>&1 | tee /opt/logs/junit4_test.log"
+RUN chmod o+rx /root && \
+    chown -R builder:builder /opt/junit4 /opt/logs
+RUN runuser -u builder -- bash -c \
+    "export JAVA_HOME=/root/.sdkman/candidates/java/current && \
+    export PATH=/root/.sdkman/candidates/maven/current/bin:\$JAVA_HOME/bin:\$PATH && \
+    cd /opt/junit4 && mvn test 2>&1 | tee /opt/logs/junit4_test.log"
+RUN chown -R root:root /opt/junit4 /opt/logs
 
 # ---------------------------------------------------------------
 # Build Commons-Net (compile + test) with logs
