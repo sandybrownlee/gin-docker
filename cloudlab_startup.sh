@@ -19,5 +19,5 @@ sudo chmod 666 /var/run/docker.sock
 docker run hello-world
  
 echo ">> To build image run: docker build -t dockerfuzzer ."
-docker build -t gin-builder .
-docker run -it -p 8888:8888 gin-builder
+sudo docker build --no-cache -t gin-builder .
+sudo docker run -it --name gin-builder
