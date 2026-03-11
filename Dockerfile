@@ -191,7 +191,7 @@ RUN python3 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
 RUN pip install --upgrade pip setuptools wheel && \
-    pip install notebook requests joblib
+    pip install notebook requests joblib litellm scikit-learn
 
 # ---------------------------------------------------------------
 # Expose Jupyter port
