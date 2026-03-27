@@ -38,7 +38,8 @@ case $GINOPTION in
           -p "${PROJECT_NAME}" \
           -d . \
           -o "${PROJECT_NAME}.Profiler_output.csv"
-
+    ;;
+    
 # ==========================
 # 2) Masking Random Search
 # ==========================
@@ -60,7 +61,8 @@ case $GINOPTION in
           -pt MASKED \
           -pn 1000 \
           &> "${RESULTS_DIR}/${PROJECT_NAME}.RandomSampler_COMBINED_1000_stderrstdout.${MODEL}.txt"
-
+    ;;
+    
 # =========================
 # 3) Masking Local Search
 # =========================
@@ -82,7 +84,8 @@ case $GINOPTION in
           -pt MASKED \
           -in 100 \
           &> "${RESULTS_DIR}/${PROJECT_NAME}.LocalSearchRuntime_LLM_MASKED_50_stderrstdout.${MODEL}.txt"
-
+    ;;
+    
 # =========================
 # 4) Local Search with PatchCat
 # =========================
