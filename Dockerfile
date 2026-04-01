@@ -212,4 +212,4 @@ CMD bash -lc "\
     echo 'Running Ollama test...' && \
     python3 /opt/test_ollama.py 2>&1 | tee /opt/logs/ollama_test.log && \
     echo 'Starting Jupyter Notebook...' && \
-    jupyter notebook --ip=0.0.0.0 --port=8888 --no-browser --allow-root --NotebookApp.token='' --NotebookApp.password='' --NotebookApp.disable_check_xsrf=True --notebook-dir=/opt"
+    jupyter notebook --ip=127.0.0.1 --port=8888 --no-browser --allow-root --NotebookApp.token='' --NotebookApp.password='' --NotebookApp.disable_check_xsrf=True --notebook-dir=/opt"
