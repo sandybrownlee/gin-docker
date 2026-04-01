@@ -22,6 +22,7 @@ echo ">> To build image run: docker build -t dockerfuzzer ."
 sudo docker build --no-cache -t gin-builder .
 echo ">> Starting Ollama Server."
 sudo docker rm -f gin-builder 2>/dev/null || true
-sudo docker run -d --name gin-builder -p 8888:8888 gin-builder:latest 
+## sudo docker run -d --name gin-builder -p 8888:8888 gin-builder:latest ---> NEVER RUN IT, it is a security vulnerability
+sudo docker run -d --name gin-builder -p 127.0.0.1:8888:8888 gin-builder:latest
 echo ">> Entering Docker container"
 sudo docker exec -it gin-builder bash
