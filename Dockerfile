@@ -22,9 +22,6 @@ RUN apt-get update && apt-get install -y \
     zstd \
     && rm -rf /var/lib/apt/lists/*
 
-# Create non-root user for builds (needed for tests that check file permissions)
-RUN useradd -m builder
-
 # ---------------------------------------------------------------
 # Install SDKMAN for Java, Maven, Gradle
 # ---------------------------------------------------------------
@@ -159,12 +156,11 @@ RUN bash -c "source $HOME/.sdkman/bin/sdkman-init.sh && \
     cd /opt/junit4 && mvn clean compile 2>&1 | tee /opt/logs/junit4_compile.log"
 
 RUN chmod o+rx /root && \
-    chown -R builder:builder /opt/junit4 /opt/logs
-RUN runuser -u builder -- bash -c \
+    chmod -R o+rwX /opt/junit4 /opt/logs && \
+    HOME=/tmp runuser -u nobody -- bash -c \
     "export JAVA_HOME=/root/.sdkman/candidates/java/current && \
     export PATH=/root/.sdkman/candidates/maven/current/bin:\$JAVA_HOME/bin:\$PATH && \
     cd /opt/junit4 && mvn test 2>&1 | tee /opt/logs/junit4_test.log"
-RUN chown -R root:root /opt/junit4 /opt/logs
 
 # ---------------------------------------------------------------
 # Build Commons-Net (compile + test) with logs
