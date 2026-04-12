@@ -133,6 +133,7 @@ RUN sed -i '140a\
 </plugin>' /opt/commons-net/pom.xml
 
 # biojava - SCOP files for biojava on an unreliable URL. This patches the test to use a more reliable one.
+RUN cd /opt/biojava && \
     perl -0777 -i -pe 's|https://scop\.berkeley\.edu/downloads/parse/|https://ftp.ebi.ac.uk/pub/databases/pdbe-kb/scop-legacy/parse/|g' biojava-structure/src/main/java/org/biojava/nbio/structure/scop/ScopInstallation.java && \
     perl -0777 -i -pe 's/assertEquals\("2GS2\.A",\s*s\.getName\(\)\);/assertTrue("Unexpected name: " + s.getName(), s.getName().equals("2GS2.A") || s.getName().startsWith("2GS2.A_"));/g' biojava-structure/src/test/java/org/biojava/nbio/structure/TestAtomCache.java && \
     perl -i -pe 's/^\s*@Test/\/\/ @Test/' "biojava-integrationtest/src/test/java/org/biojava/nbio/structure/test/cath/CathDomainTest.java" && \
