@@ -55,7 +55,12 @@ RUN curl -fsSL https://ollama.com/install.sh | tee /opt/logs/ollama_install.log 
 # Copy the gin-docker repo data (for scripts, profiling data, notebook)
 # ---------------------------------------------------------------
 #RUN git clone https://github.com/domsob/gin-docker.git /opt/gin-docker
-COPY . /opt/gin-docker
+COPY profiling_data /opt/profiling_data
+COPY pull_models.sh /opt/pull_models.sh
+COPY test_ollama.py /opt/test_ollama.py
+COPY gin_workflow.sh /opt/gin_workflow.sh
+COPY gin_workflow.ipynb /opt/gin_workflow.ipynb
+COPY config.ini /opt/config.ini
 
 # ---------------------------------------------------------------
 # Copy config (local), pull script and test script (from git)
