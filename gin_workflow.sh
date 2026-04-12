@@ -67,6 +67,18 @@ case "${proj}" in
     #     LOCAL_EXTRA_ARGS+=(-someFlag someValue)
     # ;;
 
+     gson)
+         PROFILE_EXTRA_ARGS+=(-ba -pl,gson)
+     ;;
+
+     mybatis-3)
+         COMMON_JVM_ARGS=(-J)
+         EMPTY_TIMEOUT_MS=1000000
+         RANDOM_TIMEOUT_MS=1000000
+         LOCAL_TIMEOUT_MS=1000000
+         PATCHCAT_TIMEOUT_MS=1000000
+     ;;
+
     *)
     ;;
 esac
