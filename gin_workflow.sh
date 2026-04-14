@@ -79,6 +79,14 @@ case "${proj}" in
          PATCHCAT_TIMEOUT_MS=1000000
      ;;
 
+    arthas)
+        export TZ=UTC
+        EMPTY_TIMEOUT_MS=1000000
+        RANDOM_TIMEOUT_MS=1000000
+        LOCAL_TIMEOUT_MS=1000000
+        PATCHCAT_TIMEOUT_MS=1000000
+    ;;
+
     *)
     ;;
 esac
@@ -113,15 +121,11 @@ case "${GINOPTION}" in
           -p "${PROJECT_NAME}" \
           -d . \
           -m "${PROJECT_NAME}.Profiler_output.csv" \
-          -o "${RESULTS_DIR}/${PROJECT_NAME}.RandomSampler_1000_output.${MODEL}.csv" \
+          -o "${RESULTS_DIR}/${PROJECT_NAME}.EmptyPatchTester_output.${MODEL}.csv" \
           -mavenHome "${MAVEN_HOME}" \
           -timeoutMS "${EMPTY_TIMEOUT_MS}" \
-          -et gin.edit.llm.LLMMaskedStatement \
-          -mt "${MODEL}" \
-          -pt MASKED \
-          -pn 1000 \
           "${EMPTY_EXTRA_ARGS[@]}" \
-          &> "${RESULTS_DIR}/${PROJECT_NAME}.RandomSampler_COMBINED_1000_stderrstdout.${MODEL}.txt"
+          &> "${RESULTS_DIR}/${PROJECT_NAME}.EmptyPatchTester_stderrstdout.txt"
     ;;
     
 

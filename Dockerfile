@@ -94,7 +94,7 @@ RUN git clone https://github.com/apache/commons-net.git /opt/commons-net && \
     cd /opt/commons-net && git checkout rel/commons-net-3.10.0
 
 RUN git clone https://github.com/karatelabs/karate.git /opt/karate && \
-    cd /opt/karate && git checkout v1.4.1
+    cd /opt/karate && git checkout v2.0.2
 
 RUN git clone https://github.com/biojava/biojava.git /opt/biojava && \
     cd /opt/biojava && git checkout 5a699eb6465509b853463ae34ec04c4d90bc2a54
@@ -107,6 +107,9 @@ RUN git clone https://github.com/apache/opennlp.git /opt/opennlp && \
 
 RUN git clone https://github.com/mybatis/mybatis-3.git /opt/mybatis-3 && \
     cd /opt/mybatis-3 && git checkout 59a0bcab2b3ebecb2569c1b33173d5ad9c6be152
+
+RUN git clone https://github.com/alibaba/arthas.git /opt/arthas && \
+    cd /opt/arthas && git checkout arthas-all-4.1.5
 
 
 # ---------------------------------------------------------------
@@ -142,12 +145,16 @@ RUN cd /opt/biojava && \
 # ---------------------------------------------------------------
 # Copy profiling data and notebook from gin-docker, then clean up
 # ---------------------------------------------------------------
-RUN cp /opt/gin-docker/profiling_data/jcodec.Profiler_output.csv /opt/jcodec/ && \
-    cp /opt/gin-docker/profiling_data/commons-net.Profiler_output.csv /opt/commons-net/ && \
-    cp /opt/gin-docker/profiling_data/gson.Profiler_output.csv /opt/gson/ && \
-    cp /opt/gin-docker/profiling_data/junit4.Profiler_output.csv /opt/junit4/ && \
-    cp /opt/gin-docker/profiling_data/karate-core.Profiler_output.csv /opt/karate/ && \
-    cp /opt/gin-docker/profiling_data/biojava.Profiler_output.csv /opt/biojava/ && \
+RUN cp /opt/gin-docker/profiling_data/jcodec.Profiler_output.csv_top10.csv /opt/jcodec/jcodec.Profiler_output.csv && \
+    cp /opt/gin-docker/profiling_data/commons-net.Profiler_output.csv_top10.csv /opt/commons-net/commons-net.Profiler_output.csv && \
+    cp /opt/gin-docker/profiling_data/gson.Profiler_output.csv_top10.csv /opt/gson/gson.Profiler_output.csv && \
+    cp /opt/gin-docker/profiling_data/junit4.Profiler_output.csv_top10.csv /opt/junit4/junit4.Profiler_output.csv && \
+    cp /opt/gin-docker/profiling_data/karate.Profiler_output.csv_top10.csv /opt/karate/karate.Profiler_output.csv && \
+    cp /opt/gin-docker/profiling_data/biojava.Profiler_output.csv_top10.csv /opt/biojava/biojava.Profiler_output.csv && \
+    cp /opt/gin-docker/profiling_data/spatial4j.Profiler_output.csv_top10.csv /opt/spatial4j/spatial4j.Profiler_output.csv && \
+    cp /opt/gin-docker/profiling_data/opennlp.Profiler_output.csv_top10.csv /opt/opennlp/opennlp.Profiler_output.csv && \
+    cp /opt/gin-docker/profiling_data/mybatis-3.Profiler_output.csv_top10.csv /opt/mybatis-3/mybatis-3.Profiler_output.csv && \
+    cp /opt/gin-docker/profiling_data/arthas.Profiler_output.csv_top10.csv /opt/arthas/arthas.Profiler_output.csv && \
     cp /opt/gin-docker/gin_workflow.ipynb /opt/ && \
     cp /opt/gin-docker/gin_workflow.sh /opt/ && \
     rm -rf /opt/gin-docker
@@ -202,10 +209,10 @@ RUN bash -c "source $HOME/.sdkman/bin/sdkman-init.sh && \
 # Build Karate (compile + test) with logs
 # ---------------------------------------------------------------
 RUN bash -c "source $HOME/.sdkman/bin/sdkman-init.sh && \
-    cd /opt/karate/karate-core && mvn clean compile 2>&1 | tee /opt/logs/karate_compile.log"
+    cd /opt/karate && mvn clean compile 2>&1 | tee /opt/logs/karate_compile.log"
 
 RUN bash -c "source $HOME/.sdkman/bin/sdkman-init.sh && \
-    cd /opt/karate/karate-core && mvn clean test 2>&1 | tee /opt/logs/karate_test.log"
+    cd /opt/karate && mvn clean test 2>&1 | tee /opt/logs/karate_test.log"
 
 # ---------------------------------------------------------------
 # Build Biojava (compile + test) with logs
@@ -242,6 +249,15 @@ RUN bash -c "source $HOME/.sdkman/bin/sdkman-init.sh && \
 
 RUN bash -c "source $HOME/.sdkman/bin/sdkman-init.sh && \
     cd /opt/mybatis-3 && ./mvnw clean test 2>&1 | tee /opt/logs/mybatis-3_test.log"
+
+# ---------------------------------------------------------------
+# Build arthas (compile + test) with logs
+# ---------------------------------------------------------------
+RUN bash -c "source $HOME/.sdkman/bin/sdkman-init.sh && \
+    cd /opt/arthas && ./mvnw -DskipTests clean package 2>&1 | tee /opt/logs/arthas_compile.log"
+
+RUN bash -c "source $HOME/.sdkman/bin/sdkman-init.sh && \
+    cd /opt/arthas && export TZ=UTC && ./mvnw -DskipTests=false clean verify 2>&1 | tee /opt/logs/arthas_test.log"
 
 # ---------------------------------------------------------------
 # Create Python virtual environment and install Jupyter
