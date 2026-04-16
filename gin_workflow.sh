@@ -121,7 +121,7 @@ case "${GINOPTION}" in
           -p "${PROJECT_NAME}" \
           -d . \
           -m "${PROJECT_NAME}.Profiler_output.csv" \
-          -o "${RESULTS_DIR}/${PROJECT_NAME}.EmptyPatchTester_output.${MODEL}.csv" \
+          -o "${RESULTS_DIR}/${PROJECT_NAME}.EmptyPatchTester_output.csv" \
           -mavenHome "${MAVEN_HOME}" \
           -timeoutMS "${EMPTY_TIMEOUT_MS}" \
           "${EMPTY_EXTRA_ARGS[@]}" \
