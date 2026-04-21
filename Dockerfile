@@ -274,17 +274,32 @@ RUN bash -c "source $HOME/.sdkman/bin/sdkman-init.sh && \
 # Build arthas (compile + test) with logs
 # ---------------------------------------------------------------
 # (Build arthas with vmtool installed first, then compile/test core)
-RUN bash -c "source $HOME/.sdkman/bin/sdkman-init.sh && \
+RUN bash -lc 'set -o pipefail && \
+    source "$HOME/.sdkman/bin/sdkman-init.sh" && \
     cd /opt/arthas && \
-    ./mvnw -pl arthas-vmtool -am install -DskipTests 2>&1 | tee /opt/logs/arthas_vmtool_install.log"
+    ./mvnw -pl arthas-vmtool -am install -DskipTests 2>&1 | tee /opt/logs/arthas_vmtool_install.log'
 
-RUN bash -c "source $HOME/.sdkman/bin/sdkman-init.sh && \
+RUN bash -lc 'set -o pipefail && \
+    source "$HOME/.sdkman/bin/sdkman-init.sh" && \
     cd /opt/arthas && \
-    ./mvnw -pl core -am compile -DskipTests 2>&1 | tee /opt/logs/arthas_core_compile.log"
+    ./mvnw -pl core -am compile -DskipTests 2>&1 | tee /opt/logs/arthas_core_compile.log'
 
-RUN bash -c "source $HOME/.sdkman/bin/sdkman-init.sh && \
+RUN bash -lc 'set -o pipefail && \
+    source "$HOME/.sdkman/bin/sdkman-init.sh" && \
     cd /opt/arthas && export TZ=UTC && \
-    ./mvnw -pl core -am test 2>&1 | tee /opt/logs/arthas+core_test.log"
+    ./mvnw -pl core -am test 2>&1 | tee /opt/logs/arthas_core_test.log'
+
+RUN bash -lc 'set -o pipefail && \
+    source "$HOME/.sdkman/bin/sdkman-init.sh" && \
+    cd /opt/arthas && \
+    ./mvnw -pl boot -am -DskipTests test-compile 2>&1 | tee /opt/logs/arthas_boot_testcompile.log'
+
+RUN bash -lc 'set -o pipefail && \
+    source "$HOME/.sdkman/bin/sdkman-init.sh" && \
+    cd /opt/arthas && \
+    ./mvnw -pl labs/arthas-grpc-server -am -DskipTests test-compile 2>&1 | tee /opt/logs/arthas_grpc_testcompile.log'
+
+
 
 # ---------------------------------------------------------------
 # Create Python virtual environment and install Jupyter
