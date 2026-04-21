@@ -67,20 +67,34 @@ case "${proj}" in
     #     LOCAL_EXTRA_ARGS+=(-someFlag someValue)
     # ;;
 
-     gson)
-         PROFILE_EXTRA_ARGS+=(-ba -pl,gson)
-     ;;
+    gson)
+        PROFILE_EXTRA_ARGS+=(-ba -pl,gson)
+    ;;
 
-     mybatis-3)
-         COMMON_JVM_ARGS=(-J)
-         EMPTY_TIMEOUT_MS=1000000
-         RANDOM_TIMEOUT_MS=1000000
-         LOCAL_TIMEOUT_MS=1000000
-         PATCHCAT_TIMEOUT_MS=1000000
-     ;;
+    mybatis-3)
+        COMMON_JVM_ARGS=(-J)
+        EMPTY_TIMEOUT_MS=1000000
+        RANDOM_TIMEOUT_MS=1000000
+        LOCAL_TIMEOUT_MS=1000000
+        PATCHCAT_TIMEOUT_MS=1000000
+    ;;
+
+    biojava)
+        EMPTY_TIMEOUT_MS=1000000
+        RANDOM_TIMEOUT_MS=1000000
+        LOCAL_TIMEOUT_MS=1000000
+        PATCHCAT_TIMEOUT_MS=1000000
+    ;;
 
     arthas)
         export TZ=UTC
+        EMPTY_TIMEOUT_MS=1000000
+        RANDOM_TIMEOUT_MS=1000000
+        LOCAL_TIMEOUT_MS=1000000
+        PATCHCAT_TIMEOUT_MS=1000000
+    ;;
+
+    opennlp)
         EMPTY_TIMEOUT_MS=1000000
         RANDOM_TIMEOUT_MS=1000000
         LOCAL_TIMEOUT_MS=1000000

@@ -142,6 +142,10 @@ RUN cd /opt/biojava && \
     perl -i -pe 's/^\s*@Test/\/\/ @Test/' "biojava-integrationtest/src/test/java/org/biojava/nbio/structure/test/cath/CathDomainTest.java" && \
     perl -i -pe 's/^\s*@Test/\/\/ @Test/' "biojava-integrationtest/src/test/java/org/biojava/nbio/structure/test/ecod/EcodInstallationTest.java"
 
+# arthas - patch root-sensitive FileUtils test so it passes in Docker when run as root
+RUN perl -0pi -e 's/\@Test\s+public void testOpenOutputStreamCannotWrite\(\) throws IOException \{/\@org.junit.Ignore("Fails when running tests as root in Docker")\n    \@Test\n    public void testOpenOutputStreamCannotWrite() throws IOException {/s' \
+    /opt/arthas/core/src/test/java/com/taobao/arthas/core/util/FileUtilsTest.java
+
 # ---------------------------------------------------------------
 # Copy profiling data and notebook from gin-docker, then clean up
 # ---------------------------------------------------------------
@@ -197,6 +201,23 @@ RUN chmod o+rx /root && \
     cd /opt/junit4 && mvn test 2>&1 | tee /opt/logs/junit4_test.log"
 
 # ---------------------------------------------------------------
+# Build JUnit4 (compile + test-compile + test) with logs
+# ---------------------------------------------------------------
+RUN bash -c "source $HOME/.sdkman/bin/sdkman-init.sh && \
+    cd /opt/junit4 && mvn clean compile 2>&1 | tee /opt/logs/junit4_compile.log"
+
+# this is needed so the compiled tests are still available for Gin later
+RUN bash -c "source $HOME/.sdkman/bin/sdkman-init.sh && \
+    cd /opt/junit4 && mvn -DskipTests test-compile 2>&1 | tee /opt/logs/junit4_testcompile.log"
+
+RUN chmod o+rx /root && \
+    chmod -R o+rwX /opt/junit4 /opt/logs && \
+    HOME=/tmp runuser -u nobody -- bash -c \
+    "export JAVA_HOME=/root/.sdkman/candidates/java/current && \
+    export PATH=/root/.sdkman/candidates/maven/current/bin:\$JAVA_HOME/bin:\$PATH && \
+    cd /opt/junit4 && mvn test 2>&1 | tee /opt/logs/junit4_test.log"
+
+# ---------------------------------------------------------------
 # Build Commons-Net (compile + test) with logs
 # ---------------------------------------------------------------
 RUN bash -c "source $HOME/.sdkman/bin/sdkman-init.sh && \
@@ -222,6 +243,11 @@ RUN bash -c "source $HOME/.sdkman/bin/sdkman-init.sh && \
 
 RUN bash -c "source $HOME/.sdkman/bin/sdkman-init.sh && \
     cd /opt/biojava && mvn clean test 2>&1 | tee /opt/logs/biojava_test.log"
+
+# needed to ensure submodule dependencies in local maven repo
+RUN bash -c "source $HOME/.sdkman/bin/sdkman-init.sh && \
+    rm -rf /root/.m2/repository/org/biojava && \
+    cd /opt/biojava && mvn -U -DskipTests install 2>&1 | tee /opt/logs/biojava_install.log"
 
 # ---------------------------------------------------------------
 # Build Spatial4j (compile + test) with logs
@@ -253,11 +279,18 @@ RUN bash -c "source $HOME/.sdkman/bin/sdkman-init.sh && \
 # ---------------------------------------------------------------
 # Build arthas (compile + test) with logs
 # ---------------------------------------------------------------
+# (Build arthas with vmtool installed first, then compile/test core)
 RUN bash -c "source $HOME/.sdkman/bin/sdkman-init.sh && \
-    cd /opt/arthas && ./mvnw -DskipTests clean package 2>&1 | tee /opt/logs/arthas_compile.log"
+    cd /opt/arthas && \
+    ./mvnw -pl arthas-vmtool -am install -DskipTests 2>&1 | tee /opt/logs/arthas_vmtool_install.log"
 
 RUN bash -c "source $HOME/.sdkman/bin/sdkman-init.sh && \
-    cd /opt/arthas && export TZ=UTC && ./mvnw -DskipTests=false clean verify 2>&1 | tee /opt/logs/arthas_test.log"
+    cd /opt/arthas && \
+    ./mvnw -pl core -am compile -DskipTests 2>&1 | tee /opt/logs/arthas_core_compile.log"
+
+RUN bash -c "source $HOME/.sdkman/bin/sdkman-init.sh && \
+    cd /opt/arthas && export TZ=UTC && \
+    ./mvnw -pl core -am test 2>&1 | tee /opt/logs/arthas+core_test.log"
 
 # ---------------------------------------------------------------
 # Create Python virtual environment and install Jupyter
