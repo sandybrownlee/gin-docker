@@ -188,34 +188,28 @@ RUN bash -c "source $HOME/.sdkman/bin/sdkman-init.sh && \
     cd /opt/gson && mvn clean install 2>&1 | tee /opt/logs/gson_test.log"
 
 # ---------------------------------------------------------------
-# Build JUnit4 (compile + test) with logs
+# Build JUnit4 (compile + test-compile + test as non-root) with logs
 # ---------------------------------------------------------------
-RUN bash -c "source $HOME/.sdkman/bin/sdkman-init.sh && \
-    cd /opt/junit4 && mvn clean compile 2>&1 | tee /opt/logs/junit4_compile.log"
+RUN bash -lc 'set -o pipefail && \
+    source "$HOME/.sdkman/bin/sdkman-init.sh" && \
+    cd /opt/junit4 && \
+    mvn clean compile 2>&1 | tee /opt/logs/junit4_compile.log'
 
-RUN chmod o+rx /root && \
+RUN bash -lc 'set -o pipefail && \
+    source "$HOME/.sdkman/bin/sdkman-init.sh" && \
+    cd /opt/junit4 && \
+    mvn -DskipTests test-compile 2>&1 | tee /opt/logs/junit4_testcompile.log'
+
+RUN mkdir -p /tmp/.m2/repository && \
+    chmod -R 777 /tmp/.m2 && \
+    chmod o+rx /root && \
     chmod -R o+rwX /opt/junit4 /opt/logs && \
-    HOME=/tmp runuser -u nobody -- bash -c \
-    "export JAVA_HOME=/root/.sdkman/candidates/java/current && \
-    export PATH=/root/.sdkman/candidates/maven/current/bin:\$JAVA_HOME/bin:\$PATH && \
-    cd /opt/junit4 && mvn test 2>&1 | tee /opt/logs/junit4_test.log"
-
-# ---------------------------------------------------------------
-# Build JUnit4 (compile + test-compile + test) with logs
-# ---------------------------------------------------------------
-RUN bash -c "source $HOME/.sdkman/bin/sdkman-init.sh && \
-    cd /opt/junit4 && mvn clean compile 2>&1 | tee /opt/logs/junit4_compile.log"
-
-# this is needed so the compiled tests are still available for Gin later
-RUN bash -c "source $HOME/.sdkman/bin/sdkman-init.sh && \
-    cd /opt/junit4 && mvn -DskipTests test-compile 2>&1 | tee /opt/logs/junit4_testcompile.log"
-
-RUN chmod o+rx /root && \
-    chmod -R o+rwX /opt/junit4 /opt/logs && \
-    HOME=/tmp runuser -u nobody -- bash -c \
-    "export JAVA_HOME=/root/.sdkman/candidates/java/current && \
-    export PATH=/root/.sdkman/candidates/maven/current/bin:\$JAVA_HOME/bin:\$PATH && \
-    cd /opt/junit4 && mvn test 2>&1 | tee /opt/logs/junit4_test.log"
+    HOME=/tmp runuser -u nobody -- bash -lc 'set -o pipefail && \
+    export HOME=/tmp && \
+    export JAVA_HOME=/root/.sdkman/candidates/java/current && \
+    export PATH=/root/.sdkman/candidates/maven/current/bin:$JAVA_HOME/bin:$PATH && \
+    cd /opt/junit4 && \
+    mvn -Dmaven.repo.local=/tmp/.m2/repository test 2>&1 | tee /opt/logs/junit4_test.log'
 
 # ---------------------------------------------------------------
 # Build Commons-Net (compile + test) with logs
